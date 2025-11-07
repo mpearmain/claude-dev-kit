@@ -1,0 +1,94 @@
+# Python with uv - Installation Configuration
+
+When you run `./install.sh` in a Python project with uv:
+
+## Auto-Detected Values
+
+Detection trigger: `uv.lock` file present
+```
+Project name: [from directory name]
+Main source directory: src
+Test command: uv run pytest
+Lint command: uv run ruff check
+Build command: uv build
+Setup command: uv sync
+```
+
+## Example Project Structures Supported
+
+### Standard Layout
+```
+project/
+├── pyproject.toml
+├── uv.lock
+├── src/
+│   └── package/
+├── tests/
+└── .claude/
+```
+
+### Multi-Package Monorepo
+```
+project/
+├── pyproject.toml
+├── uv.lock
+├── src/
+│   ├── api/
+│   ├── auth/
+│   └── utils/
+├── tests/
+└── .claude/
+```
+
+### Flat Structure
+```
+project/
+├── pyproject.toml
+├── uv.lock
+├── package/
+├── tests/
+└── .claude/
+```
+
+## Resulting Command Configuration
+
+After installation, commands will use:
+
+```markdown
+# In .claude/commands/research_codebase.md
+"research the {project-name} codebase"
+"look in src/ for relevant files"
+
+# In .claude/commands/validate_plan.md
+"run uv run pytest to verify"
+"run uv run ruff check for linting"
+```
+
+## Common Customizations Post-Install
+
+### Add Coverage Reporting
+Edit `.claude/commands/validate_plan.md`:
+```
+uv run pytest --cov=src --cov-report=html tests/
+```
+
+### Add Type Checking
+Edit `.claude/commands/validate_plan.md`:
+```
+uv run mypy src/
+```
+
+### Specific Test Paths
+Edit `.claude/commands/validate_plan.md`:
+```
+uv run pytest tests/unit/ tests/integration/
+```
+
+## Environment Variables
+
+Required in `.env`:
+```bash
+# Usually no Python-specific env vars needed
+# Add if using specific test configurations
+PYTHONPATH=src
+```

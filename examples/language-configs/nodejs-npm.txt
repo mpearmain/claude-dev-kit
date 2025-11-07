@@ -1,0 +1,101 @@
+# Node.js with npm - Installation Configuration
+
+When you run `./install.sh` in a Node.js project:
+
+## Auto-Detected Values
+
+Detection trigger: `package.json` file present (no pnpm/yarn lock files)
+```
+Project name: [from package.json name field or directory]
+Main source directory: src
+Test command: npm test
+Lint command: npm run lint
+Build command: npm run build
+Setup command: npm install
+```
+
+## Example Project Structures Supported
+
+### React/Frontend
+```
+project/
+├── package.json
+├── package-lock.json
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── App.tsx
+├── public/
+└── .claude/
+```
+
+### Express/Backend
+```
+project/
+├── package.json
+├── package-lock.json
+├── src/
+│   ├── routes/
+│   ├── controllers/
+│   ├── models/
+│   └── index.ts
+└── .claude/
+```
+
+### Monorepo with Workspaces
+```
+project/
+├── package.json
+├── packages/
+│   ├── frontend/
+│   ├── backend/
+│   └── shared/
+└── .claude/
+```
+
+## Resulting Command Configuration
+
+```markdown
+# In .claude/commands/research_codebase.md
+"research the {project-name} codebase"
+"look in src/ for relevant files"
+
+# In .claude/commands/validate_plan.md
+"run npm test to verify"
+"run npm run lint for linting"
+"run npm run build to compile"
+```
+
+## Common Customizations Post-Install
+
+### Add Type Checking
+Edit `.claude/commands/validate_plan.md`:
+```
+npm run type-check
+# or
+npx tsc --noEmit
+```
+
+### Specific Test Commands
+Edit `.claude/commands/validate_plan.md`:
+```
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+```
+
+### Custom Build Steps
+Edit `.claude/commands/validate_plan.md`:
+```
+npm run build
+npm run build:prod
+```
+
+## Environment Variables
+
+Typical `.env`:
+```bash
+NODE_ENV=development
+PORT=3000
+# Add project-specific variables
+```

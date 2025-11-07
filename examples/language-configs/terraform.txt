@@ -1,0 +1,132 @@
+# Terraform - Installation Configuration
+
+When you run `./install.sh` in a Terraform project:
+
+## Auto-Detected Values
+
+Detection trigger: `main.tf` file or `modules/` directory present
+```
+Project name: [from directory name]
+Main source directory: modules
+Test command: terraform validate
+Lint command: tflint
+Build command: terraform plan
+Setup command: terraform init
+```
+
+## Example Project Structures Supported
+
+### Standard Terraform Layout
+```
+project/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── modules/
+│   ├── networking/
+│   ├── compute/
+│   └── storage/
+└── .claude/
+```
+
+### Environment-Based Structure
+```
+project/
+├── environments/
+│   ├── dev/
+│   ├── staging/
+│   └── prod/
+├── modules/
+│   └── shared/
+└── .claude/
+```
+
+### Module Library
+```
+project/
+├── modules/
+│   ├── aws-vpc/
+│   ├── aws-eks/
+│   └── azure-aks/
+├── examples/
+└── .claude/
+```
+
+## Resulting Command Configuration
+
+```markdown
+# In .claude/commands/research_codebase.md
+"research the {project-name} infrastructure code"
+"look in modules/ for relevant infrastructure"
+
+# In .claude/commands/validate_plan.md
+"run terraform validate to verify syntax"
+"run tflint for linting"
+"run terraform plan to preview changes"
+```
+
+## Common Customizations Post-Install
+
+### Add Security Scanning
+Edit `.claude/commands/validate_plan.md`:
+```
+tfsec .
+checkov -d .
+```
+
+### Multi-Environment Validation
+Edit `.claude/commands/validate_plan.md`:
+```
+for env in dev staging prod; do
+  cd environments/$env
+  terraform validate
+done
+```
+
+### Format Checking
+Edit `.claude/commands/validate_plan.md`:
+```
+terraform fmt -check -recursive
+```
+
+## Environment Variables
+
+Typical `.env`:
+```bash
+# Cloud Provider Credentials
+AWS_PROFILE=default
+AWS_REGION=us-east-1
+
+# Terraform Backend
+TF_BACKEND_BUCKET=terraform-state
+TF_BACKEND_KEY=project/terraform.tfstate
+
+# Project-specific
+TF_VAR_environment=dev
+TF_VAR_project_name=example
+```
+
+## Special Considerations
+
+### State Files
+Terraform state files should NOT be committed. The workflow respects standard `.gitignore`:
+```gitignore
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+```
+
+### Research Scope
+When researching infrastructure:
+- Agents search `.tf` files
+- Include module documentation
+- Reference variable definitions
+- Map resource dependencies
+
+### Implementation Notes
+Infrastructure changes are often more delicate than application code:
+- Plans should include rollback procedures
+- Each phase should validate before apply
+- Consider environment-specific changes
+- Document state migration if needed
