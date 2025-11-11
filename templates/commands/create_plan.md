@@ -141,7 +141,39 @@ After getting initial clarifications:
    Which approach aligns best with your vision?
    ```
 
-### Step 3: Plan Structure Development
+### Step 3: Architectural Consultation (Optional)
+
+If specialists are configured in `.claude-specialists.yml`:
+
+1. **Check for auto-triggers**:
+   - Read `.claude-specialists.yml` if it exists
+   - Check if any changed files match specialist patterns
+   - Auto-invoke matching specialists
+
+2. **Specialist invocation format**:
+   ```
+   For detected changes in [files], consulting [specialist-name]:
+
+   [Spawning Task with specialist agent]
+   ```
+
+3. **Process specialist guidance**:
+   - Wait for specialist responses
+   - Incorporate recommendations into plan
+   - Note any constraints or standards referenced
+
+4. **Manual specialist invocation**:
+   If user requests specific expertise, invoke relevant specialist:
+   ```
+   Task(
+     subagent_type="[specialist-name]",
+     prompt="Given [requirements], recommend [domain] approach for [feature].
+             Return: recommendation, tradeoffs, implementation references.",
+     description="[Domain] architecture consultation"
+   )
+   ```
+
+### Step 4: Plan Structure Development
 
 Once aligned on approach:
 
@@ -162,7 +194,7 @@ Once aligned on approach:
 
 2. **Get feedback on structure** before writing details
 
-### Step 4: Detailed Plan Writing
+### Step 5: Detailed Plan Writing
 
 After structure approval:
 
@@ -283,7 +315,7 @@ confirmation from the human that the manual testing was successful before procee
 - Similar implementation: `[file:line]`
 ````
 
-### Step 5: Sync and Review
+### Step 6: Sync and Review
 
 1. **Sync the thoughts directory**:
     - Run `npx humanlayer thoughts sync` to sync the newly created plan

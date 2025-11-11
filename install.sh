@@ -182,6 +182,305 @@ check_optional_tools() {
     fi
 }
 
+# Optional Agent Selection Menu
+show_agent_menu() {
+    echo -e "\n${BLUE}═══ Optional Workflow Agents ═══${NC}\n"
+    echo "Select additional agents to enhance your workflow:"
+    echo ""
+    echo "  ${GREEN}[1]${NC} Docker Specialist    - Container optimization & best practices"
+    echo "  ${GREEN}[2]${NC} API Architect       - REST/GraphQL API design patterns"
+    echo "  ${GREEN}[3]${NC} Database Specialist - Schema design & query optimization"
+    echo "  ${GREEN}[4]${NC} Security Advisor    - Security best practices & vulnerability prevention"
+    echo "  ${GREEN}[5]${NC} Performance Analyst - Performance optimization & profiling"
+    echo "  ${GREEN}[6]${NC} Testing Strategist  - Test architecture & coverage strategies"
+    echo ""
+    echo "  ${GREEN}[a]${NC} Install all agents"
+    echo "  ${GREEN}[n]${NC} Skip optional agents"
+    echo ""
+    echo -e "${YELLOW}You can add more agents later by copying from templates/agents/${NC}"
+    echo ""
+    read -p "Enter choices (e.g., 1,3,5 or 'a' for all): " agent_choices
+
+    local selected_agents=()
+
+    if [[ "$agent_choices" == "a" ]]; then
+        selected_agents=("docker-specialist" "api-architect" "database-specialist"
+                        "security-advisor" "performance-analyst" "testing-strategist")
+    elif [[ "$agent_choices" != "n" ]]; then
+        IFS=',' read -ra choices <<< "$agent_choices"
+        for choice in "${choices[@]}"; do
+            case ${choice// /} in
+                1) selected_agents+=("docker-specialist") ;;
+                2) selected_agents+=("api-architect") ;;
+                3) selected_agents+=("database-specialist") ;;
+                4) selected_agents+=("security-advisor") ;;
+                5) selected_agents+=("performance-analyst") ;;
+                6) selected_agents+=("testing-strategist") ;;
+            esac
+        done
+    fi
+
+    # Return selected agents array
+    echo "${selected_agents[@]}"
+}
+
+# Setup specialist configuration based on selections
+setup_specialist_config() {
+    local target_dir="$1"
+    shift
+    local selected_agents=("$@")
+
+    # Copy base configuration file
+    cp "$TEMPLATES_DIR/.claude-specialists.yml" "$target_dir/.claude/"
+
+    # Create a temporary file for modifications
+    local temp_file="${target_dir}/.claude/.claude-specialists.yml.tmp"
+    local config_file="${target_dir}/.claude/.claude-specialists.yml"
+
+    # Enable selected specialists in the configuration using simple bash
+    for agent in "${selected_agents[@]}"; do
+        local specialist_key=""
+        case $agent in
+            docker-specialist)
+                specialist_key="docker"
+                ;;
+            api-architect)
+                specialist_key="api"
+                ;;
+            database-specialist)
+                specialist_key="database"
+                ;;
+            security-advisor)
+                specialist_key="security"
+                ;;
+            performance-analyst)
+                specialist_key="performance"
+                ;;
+            testing-strategist)
+                specialist_key="testing"
+                ;;
+        esac
+
+        if [[ -n "$specialist_key" ]]; then
+            # Read the file and update the enabled flag for this specialist
+            awk -v key="$specialist_key" '
+                /^[[:space:]]*'"$specialist_key"':/ { found=1 }
+                found && /enabled:/ {
+                    sub(/false/, "true");
+                    found=0
+                }
+                { print }
+            ' "$config_file" > "$temp_file"
+            mv "$temp_file" "$config_file"
+        fi
+    done
+
+    info "  ✓ Specialist configuration created"
+}
+
+# Pre-commit detection and setup
+setup_precommit() {
+    local target_dir="$1"
+
+    if [[ -f "$target_dir/.pre-commit-config.yaml" ]]; then
+        echo -e "\n${BLUE}Pre-commit hooks detected${NC}"
+        echo -e "${GREEN}Enable commit validation workflow? (y/n)${NC}"
+        read -r ENABLE_PRECOMMIT
+
+        if [[ "$ENABLE_PRECOMMIT" == "y" ]]; then
+            # Copy checklist
+            cp "$TEMPLATES_DIR/COMMIT_CHECKLIST.md" "$target_dir/.claude/"
+
+            # Customize based on language
+            local PRECOMMIT_CMD="pre-commit run --all-files"
+            local VERIFY_CMDS=""
+            local MAIN_LANGUAGE=""
+
+            # Detect main language
+            if [[ -f "$target_dir/pyproject.toml" ]] || [[ -f "$target_dir/setup.py" ]]; then
+                MAIN_LANGUAGE="python"
+            elif [[ -f "$target_dir/package.json" ]]; then
+                MAIN_LANGUAGE="javascript"
+            elif [[ -f "$target_dir/go.mod" ]]; then
+                MAIN_LANGUAGE="go"
+            fi
+
+            case $MAIN_LANGUAGE in
+                python)
+                    PRECOMMIT_CMD="pre-commit run --all-files"
+                    VERIFY_CMDS="# Type checking\n$TEST_COMMAND\n$LINT_COMMAND"
+
+                    # Enable Python hooks in pre-commit config if not exists
+                    if [[ ! -f "$target_dir/.pre-commit-config.yaml" ]]; then
+                        cp "$TEMPLATES_DIR/.pre-commit-config.yaml" "$target_dir/"
+                        # Uncomment Python hooks
+                        sed -i.bak 's/# - repo:.*ruff/- repo:/' "$target_dir/.pre-commit-config.yaml"
+                        sed -i.bak 's/#   /  /' "$target_dir/.pre-commit-config.yaml"
+                        rm -f "$target_dir/.pre-commit-config.yaml.bak"
+                    fi
+                    ;;
+                javascript)
+                    PRECOMMIT_CMD="pre-commit run --all-files"
+                    VERIFY_CMDS="$TEST_COMMAND\n$LINT_COMMAND\n$BUILD_COMMAND"
+
+                    # Enable JS hooks
+                    if [[ ! -f "$target_dir/.pre-commit-config.yaml" ]]; then
+                        cp "$TEMPLATES_DIR/.pre-commit-config.yaml" "$target_dir/"
+                        # Uncomment JS hooks
+                        sed -i.bak 's/# - repo:.*prettier/- repo:/' "$target_dir/.pre-commit-config.yaml"
+                        sed -i.bak 's/#   /  /' "$target_dir/.pre-commit-config.yaml"
+                        rm -f "$target_dir/.pre-commit-config.yaml.bak"
+                    fi
+                    ;;
+                go)
+                    PRECOMMIT_CMD="pre-commit run --all-files"
+                    VERIFY_CMDS="$TEST_COMMAND\n$LINT_COMMAND\n$BUILD_COMMAND"
+                    ;;
+                *)
+                    VERIFY_CMDS="$TEST_COMMAND\n$LINT_COMMAND"
+                    ;;
+            esac
+
+            # Replace placeholders in checklist
+            sed -i.bak "s|{{PRE_COMMIT_COMMAND}}|$PRECOMMIT_CMD|g" "$target_dir/.claude/COMMIT_CHECKLIST.md"
+            sed -i.bak "s|{{VERIFICATION_COMMANDS}}|$VERIFY_CMDS|g" "$target_dir/.claude/COMMIT_CHECKLIST.md"
+            rm -f "$target_dir/.claude/COMMIT_CHECKLIST.md.bak"
+
+            info "  ✓ Commit validation workflow enabled"
+            warn "Remember to run 'pre-commit install' to set up hooks"
+        fi
+    else
+        echo -e "\n${YELLOW}No pre-commit configuration found. Skipping validation setup.${NC}"
+        echo -e "${YELLOW}To enable later, create .pre-commit-config.yaml and re-run installer${NC}"
+    fi
+}
+
+# Code quality standards setup
+setup_quality_standards() {
+    local target_dir="$1"
+
+    info "\nSetting up code quality standards..."
+
+    # Copy standards template
+    cp "$TEMPLATES_DIR/CODE_QUALITY_STANDARDS.md" "$target_dir/.claude/"
+
+    # Customize based on language
+    local MIN_COVERAGE="80"
+    local MAIN_LANGUAGE=""
+
+    # Detect main language
+    if [[ -f "$target_dir/pyproject.toml" ]] || [[ -f "$target_dir/setup.py" ]]; then
+        MAIN_LANGUAGE="python"
+    elif [[ -f "$target_dir/package.json" ]]; then
+        # Check if TypeScript
+        if [[ -f "$target_dir/tsconfig.json" ]]; then
+            MAIN_LANGUAGE="typescript"
+        else
+            MAIN_LANGUAGE="javascript"
+        fi
+    elif [[ -f "$target_dir/go.mod" ]]; then
+        MAIN_LANGUAGE="go"
+    elif [[ -f "$target_dir/Cargo.toml" ]]; then
+        MAIN_LANGUAGE="rust"
+    else
+        MAIN_LANGUAGE="generic"
+    fi
+
+    case $MAIN_LANGUAGE in
+        python)
+            sed -i.bak 's/{{MAIN_LANGUAGE}}/Python/g' "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+            # Remove JS-specific sections (everything between ### JavaScript/TypeScript and ### Python)
+            awk '/### JavaScript\/TypeScript/{flag=1} /### Python/{flag=0; print; next} !flag' \
+                "$target_dir/.claude/CODE_QUALITY_STANDARDS.md" > "$target_dir/.claude/CODE_QUALITY_STANDARDS.md.tmp"
+            mv "$target_dir/.claude/CODE_QUALITY_STANDARDS.md.tmp" "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+            ;;
+        javascript|typescript)
+            sed -i.bak "s/{{MAIN_LANGUAGE}}/$MAIN_LANGUAGE/g" "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+            # Remove Python-specific sections (everything between ### Python and ## Dead Code Removal)
+            awk '/### Python/{flag=1} /## Dead Code Removal/{flag=0; print; next} !flag' \
+                "$target_dir/.claude/CODE_QUALITY_STANDARDS.md" > "$target_dir/.claude/CODE_QUALITY_STANDARDS.md.tmp"
+            mv "$target_dir/.claude/CODE_QUALITY_STANDARDS.md.tmp" "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+            ;;
+        *)
+            sed -i.bak "s/{{MAIN_LANGUAGE}}/$MAIN_LANGUAGE/g" "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+            ;;
+    esac
+
+    sed -i.bak "s/{{MIN_COVERAGE}}/$MIN_COVERAGE/g" "$target_dir/.claude/CODE_QUALITY_STANDARDS.md"
+    rm -f "$target_dir/.claude/CODE_QUALITY_STANDARDS.md.bak"
+
+    info "  ✓ Code quality standards configured for $MAIN_LANGUAGE"
+}
+
+# Commitlint setup
+setup_commitlint() {
+    local target_dir="$1"
+
+    info "\nSetting up commit conventions..."
+
+    # Copy templates
+    cp "$TEMPLATES_DIR/COMMIT_SCOPES.yml" "$target_dir/.claude/"
+    cp "$TEMPLATES_DIR/.commitlintrc.yml" "$target_dir/"
+
+    # Detect project type and suggest scopes
+    local DETECTED_SCOPES=""
+
+    # Check for common directories/files to suggest scopes
+    [[ -d "$target_dir/api" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - api\n"
+    [[ -d "$target_dir/auth" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - auth\n"
+    [[ -d "$target_dir/components" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - components\n"
+    [[ -d "$target_dir/pages" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - pages\n"
+    [[ -d "$target_dir/models" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - models\n"
+    [[ -d "$target_dir/routes" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - routes\n"
+    [[ -d "$target_dir/services" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - services\n"
+    [[ -d "$target_dir/utils" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - utils\n"
+    [[ -f "$target_dir/Dockerfile" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - docker\n"
+    [[ -d "$target_dir/k8s" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - k8s\n"
+    [[ -d "$target_dir/terraform" ]] && DETECTED_SCOPES="$DETECTED_SCOPES  - terraform\n"
+
+    if [[ -n "$DETECTED_SCOPES" ]]; then
+        info "Detected project scopes:"
+        echo -e "$DETECTED_SCOPES"
+
+        # Add to COMMIT_SCOPES.yml after "# Features" comment
+        # Using awk to insert after the Features line
+        awk -v scopes="$DETECTED_SCOPES" '
+            /# Features/ {
+                print
+                printf "%s", scopes
+                next
+            }
+            { print }
+        ' "$target_dir/.claude/COMMIT_SCOPES.yml" > "$target_dir/.claude/COMMIT_SCOPES.yml.tmp"
+        mv "$target_dir/.claude/COMMIT_SCOPES.yml.tmp" "$target_dir/.claude/COMMIT_SCOPES.yml"
+    fi
+
+    # Check if package.json exists for npm setup
+    if [[ -f "$target_dir/package.json" ]]; then
+        warn "To complete commitlint setup:"
+        warn "1. Install commitlint:"
+        warn "   npm install --save-dev @commitlint/cli @commitlint/config-conventional"
+        warn "2. Add to package.json scripts:"
+        warn '   "commitlint": "commitlint --edit"'
+        warn "3. Configure git hook:"
+        warn "   npx husky add .husky/commit-msg 'npx commitlint --edit \$1'"
+    fi
+
+    # For Python projects
+    if [[ -f "$target_dir/pyproject.toml" ]]; then
+        warn "To complete commitlint setup:"
+        warn "1. Install commitizen:"
+        warn "   pip install commitizen"
+        warn "2. Add to pyproject.toml:"
+        warn "   [tool.commitizen]"
+        warn "   name = 'cz_conventional_commits'"
+        warn "3. Use 'cz commit' for interactive commits"
+    fi
+
+    info "  ✓ Commit conventions configured"
+    warn "Remember to customize scopes in .claude/COMMIT_SCOPES.yml"
+}
+
 # Prompt user for values with defaults
 prompt_for_values() {
     local interactive="${1:-true}"
@@ -463,8 +762,46 @@ main() {
     # Prompt for values
     prompt_for_values "$interactive"
 
+    # Show agent menu if interactive and save selected agents
+    local selected_specialist_agents=""
+    if [[ "$interactive" == "true" ]] && [[ "$dry_run" != "true" ]]; then
+        selected_specialist_agents=$(show_agent_menu)
+    fi
+
     # Install templates
     install_templates "$target_dir" "$dry_run"
+
+    # Install selected specialist agents
+    if [[ -n "$selected_specialist_agents" ]] && [[ "$dry_run" != "true" ]]; then
+        info "\nInstalling selected specialist agents..."
+        for agent in $selected_specialist_agents; do
+            if [[ -f "$TEMPLATES_DIR/agents/${agent}.md" ]]; then
+                cp "$TEMPLATES_DIR/agents/${agent}.md" "${target_dir}/.claude/agents/"
+                replace_placeholders "${target_dir}/.claude/agents/${agent}.md"
+                echo "  ✓ ${agent}"
+            fi
+        done
+
+        # Setup configuration for selected agents
+        if [[ -n "$selected_specialist_agents" ]]; then
+            setup_specialist_config "$target_dir" $selected_specialist_agents
+        fi
+    fi
+
+    # Setup pre-commit if detected
+    if [[ "$interactive" == "true" ]] && [[ "$dry_run" != "true" ]]; then
+        setup_precommit "$target_dir"
+    fi
+
+    # Setup code quality standards
+    if [[ "$dry_run" != "true" ]]; then
+        setup_quality_standards "$target_dir"
+    fi
+
+    # Setup commit conventions
+    if [[ "$dry_run" != "true" ]]; then
+        setup_commitlint "$target_dir"
+    fi
 
     # Print summary
     if [[ "$dry_run" != "true" ]]; then
