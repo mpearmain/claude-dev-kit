@@ -53,7 +53,7 @@ Then wait for the user's input.
 
    These agents will:
     - Find relevant source files, configs, and tests
-    - Identify the specific directories to focus on (e.g., `{{MAIN_SRC_DIR}}/`)
+    - Identify the specific directories to focus on (e.g., `./`)
     - Trace data flow and key functions
     - Return detailed explanations with file:line references
 
@@ -70,7 +70,7 @@ Then wait for the user's input.
 
 5. **Present informed understanding and focused questions**:
    ```
-   Based on the ticket and my research of the {{PROJECT_NAME}} codebase, I understand we need to [accurate summary].
+   Based on the ticket and my research of the claude-dev-kit codebase, I understand we need to [accurate summary].
 
    I've found that:
    - [Current implementation detail with file:line reference]
@@ -141,39 +141,7 @@ After getting initial clarifications:
    Which approach aligns best with your vision?
    ```
 
-### Step 3: Architectural Consultation (Optional)
-
-If specialists are configured in `.claude-specialists.yml`:
-
-1. **Check for auto-triggers**:
-   - Read `.claude-specialists.yml` if it exists
-   - Check if any changed files match specialist patterns
-   - Auto-invoke matching specialists
-
-2. **Specialist invocation format**:
-   ```
-   For detected changes in [files], consulting [specialist-name]:
-
-   [Spawning Task with specialist agent]
-   ```
-
-3. **Process specialist guidance**:
-   - Wait for specialist responses
-   - Incorporate recommendations into plan
-   - Note any constraints or standards referenced
-
-4. **Manual specialist invocation**:
-   If user requests specific expertise, invoke relevant specialist:
-   ```
-   Task(
-     subagent_type="[specialist-name]",
-     prompt="Given [requirements], recommend [domain] approach for [feature].
-             Return: recommendation, tradeoffs, implementation references.",
-     description="[Domain] architecture consultation"
-   )
-   ```
-
-### Step 4: Plan Structure Development
+### Step 3: Plan Structure Development
 
 Once aligned on approach:
 
@@ -194,7 +162,7 @@ Once aligned on approach:
 
 2. **Get feedback on structure** before writing details
 
-### Step 5: Detailed Plan Writing
+### Step 4: Detailed Plan Writing
 
 After structure approval:
 
@@ -260,7 +228,7 @@ After structure approval:
 
 #### Automated Verification:
 
-- [ ] Tests pass: `{{TEST_COMMAND}}`
+- [ ] Tests pass: `make test`
 - [ ] Type checking passes: `npm run typecheck` (or equivalent)
 - [ ] Linting passes: `npm run lint` (or equivalent)
 - [ ] Build succeeds: `npm run build` (or equivalent)
@@ -315,7 +283,7 @@ confirmation from the human that the manual testing was successful before procee
 - Similar implementation: `[file:line]`
 ````
 
-### Step 6: Sync and Review
+### Step 5: Sync and Review
 
 1. **Sync the thoughts directory**:
     - Run `npx humanlayer thoughts sync` to sync the newly created plan
@@ -386,7 +354,7 @@ confirmation from the human that the manual testing was successful before procee
 **Always separate success criteria into two categories:**
 
 1. **Automated Verification** (can be run by execution agents):
-    - Commands that can be run: `{{TEST_COMMAND}}`, linting, type checking, etc.
+    - Commands that can be run: `make test`, linting, type checking, etc.
     - Specific files that should exist
     - Code compilation/type checking
     - Automated test suites
@@ -404,7 +372,7 @@ confirmation from the human that the manual testing was successful before procee
 
 #### Automated Verification:
 
-- [ ] All tests pass: `{{TEST_COMMAND}}`
+- [ ] All tests pass: `make test`
 - [ ] No linting errors: `npm run lint`
 - [ ] Type checking passes: `npm run typecheck`
 - [ ] Build succeeds: `npm run build`
@@ -450,7 +418,7 @@ When spawning research sub-tasks:
 2. **Each task should be focused** on a specific area
 3. **Provide detailed instructions** including:
     - Exactly what to search for
-    - Which directories to focus on (e.g., `{{MAIN_SRC_DIR}}/`)
+    - Which directories to focus on (e.g., `./`)
     - What information to extract
     - Expected output format
 4. **Be EXTREMELY specific about directories**:
@@ -487,7 +455,7 @@ Assistant: Let me read that ticket file completely first...
 
 [Reads file fully]
 
-Based on the ticket, I understand we need to [summary]. Before I start planning, let me research the {{PROJECT_NAME}} codebase to understand the current implementation...
+Based on the ticket, I understand we need to [summary]. Before I start planning, let me research the claude-dev-kit codebase to understand the current implementation...
 
 [Interactive process continues...]
 ```

@@ -16,39 +16,6 @@ When given a plan path:
 
 If no plan path provided, ask for one.
 
-## Code Quality Standards
-
-If `.claude/CODE_QUALITY_STANDARDS.md` exists, apply these standards:
-
-### Documentation Requirements
-- Read `.claude/CODE_QUALITY_STANDARDS.md` for language-specific standards
-- Every public function must have appropriate documentation
-- Complex logic must include explanatory comments
-- State machines and workflows must be documented
-
-### Dead Code Removal
-Before implementing new features, clean up:
-- Commented-out code blocks
-- Unused imports and variables
-- Deprecated functions (unless needed for compatibility)
-- Debug console.log/print statements
-- TODO comments without associated tickets
-
-### Code Organization
-- Follow file structure conventions from standards
-- Maintain consistent naming conventions
-- Organize imports according to standards
-- One class/component per file
-
-### Quality Checklist for Each Phase
-After implementing each phase:
-- [ ] Documentation added for new functions
-- [ ] Dead code removed
-- [ ] Imports organized
-- [ ] Type hints/types added (if applicable)
-- [ ] Security considerations addressed
-- [ ] Performance impact considered
-
 ## Implementation Philosophy
 
 Plans are carefully designed, but reality can be messy. Your job is to:
@@ -78,7 +45,7 @@ If you encounter a mismatch:
 
 After implementing a phase:
 
-- Run the success criteria checks (typically `{{TEST_COMMAND}}` and build/lint commands)
+- Run the success criteria checks (typically `make test` and build/lint commands)
 - Fix any issues before proceeding
 - Update your progress in both the plan and your todos
 - Check off completed items in the plan file itself using Edit

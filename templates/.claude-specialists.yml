@@ -1,0 +1,66 @@
+# Specialist Agent Configuration
+# Enable/disable specialists and configure auto-triggers
+
+specialists:
+  docker:
+    enabled: false
+    agent: docker-specialist
+    auto_trigger_patterns:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - ".dockerignore"
+      - "*/containers/*"
+
+  api:
+    enabled: false
+    agent: api-architect
+    auto_trigger_patterns:
+      - "*/api/*"
+      - "*/routes/*"
+      - "*/endpoints/*"
+      - "*/controllers/*"
+      - "*/graphql/*"
+
+  database:
+    enabled: false
+    agent: database-specialist
+    auto_trigger_patterns:
+      - "*/models/*"
+      - "*/schemas/*"
+      - "*/migrations/*"
+      - "*.sql"
+      - "*/db/*"
+
+  security:
+    enabled: false
+    agent: security-advisor
+    auto_trigger_patterns:
+      - "*/auth/*"
+      - "*/security/*"
+      - "*/permissions/*"
+      - "*crypto*"
+
+  performance:
+    enabled: false
+    agent: performance-analyst
+    auto_trigger_patterns:
+      - "*/cache/*"
+      - "*/optimization/*"
+      - "*worker*"
+      - "*queue*"
+
+  testing:
+    enabled: false
+    agent: testing-strategist
+    auto_trigger_patterns:
+      - "*/tests/*"
+      - "*/test/*"
+      - "*spec.js"
+      - "*test.py"
+
+  # Add custom specialists here
+  # custom:
+  #   enabled: false
+  #   agent: custom-specialist
+  #   auto_trigger_patterns:
+  #     - "pattern/*.ext"

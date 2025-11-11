@@ -1,0 +1,76 @@
+# Commit Scope Configuration
+# Used with conventional commits format: type(scope): description
+
+# Conventional commit types (commitlint standard)
+types:
+  - feat     # New feature
+  - fix      # Bug fix
+  - docs     # Documentation only
+  - style    # Code style (formatting, semicolons, etc)
+  - refactor # Code change that neither fixes a bug nor adds a feature
+  - perf     # Performance improvement
+  - test     # Adding or updating tests
+  - build    # Build system or dependencies
+  - ci       # CI/CD configuration
+  - chore    # Other changes that don't modify src or test files
+  - revert   # Reverts a previous commit
+
+# Project-specific scopes
+# Add your module/component names here
+scopes:
+  # Core modules
+  - api       # API endpoints and routing
+  - auth      # Authentication and authorization
+  - db        # Database and models
+  - config    # Configuration files
+
+  # Features (customize based on project)
+  - users     # User management
+  - admin     # Admin functionality
+  - billing   # Billing and payments
+  - notifications # Notification system
+
+  # Infrastructure
+  - docker    # Docker configuration
+  - k8s       # Kubernetes configuration
+  - terraform # Infrastructure as code
+
+  # Development
+  - deps      # Dependencies
+  - dev       # Development tools
+  - test      # Testing infrastructure
+  - docs      # Documentation
+
+  # Frontend (if applicable)
+  - ui        # User interface components
+  - pages     # Page components
+  - hooks     # React hooks or similar
+  - store     # State management
+  - styles    # Styling and themes
+
+# Scope rules
+rules:
+  # Require scope for certain types
+  scope-required:
+    - feat
+    - fix
+    - refactor
+    - perf
+
+  # Optional scope for these types
+  scope-optional:
+    - docs
+    - style
+    - test
+    - build
+    - ci
+    - chore
+    - revert
+
+# Examples
+examples:
+  - "feat(auth): add OAuth2 integration"
+  - "fix(api): resolve rate limiting issue"
+  - "refactor(db): optimize query performance"
+  - "docs: update API documentation"
+  - "chore(deps): upgrade dependencies"

@@ -1,0 +1,8 @@
+# Ignore searchable index (regenerated automatically)
+searchable/
+
+# Optionally ignore personal notes (uncomment if needed)
+# personal/
+
+# Keep shared artefacts committed
+!shared/

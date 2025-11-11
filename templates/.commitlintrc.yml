@@ -1,0 +1,73 @@
+# Commitlint Configuration
+# Enforces conventional commit format with project scopes
+
+extends:
+  - '@commitlint/config-conventional'
+
+rules:
+  # Type rules
+  type-enum:
+    - 2
+    - always
+    - [feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert]
+
+  type-case:
+    - 2
+    - always
+    - lower-case
+
+  type-empty:
+    - 2
+    - never
+
+  # Scope rules
+  scope-enum:
+    - 2
+    - always
+    - [] # Will be populated from COMMIT_SCOPES.yml
+
+  scope-case:
+    - 2
+    - always
+    - lower-case
+
+  # Subject rules
+  subject-empty:
+    - 2
+    - never
+
+  subject-full-stop:
+    - 2
+    - never
+    - '.'
+
+  subject-case:
+    - 2
+    - never
+    - [sentence-case, start-case, pascal-case, upper-case]
+
+  # Header rules
+  header-max-length:
+    - 2
+    - always
+    - 100
+
+  # Body rules
+  body-leading-blank:
+    - 1
+    - always
+
+  body-max-line-length:
+    - 2
+    - always
+    - 100
+
+  # Footer rules
+  footer-leading-blank:
+    - 1
+    - always
+
+  footer-max-line-length:
+    - 2
+    - always
+    - 100
