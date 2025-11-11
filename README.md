@@ -1,5 +1,7 @@
 # Claude Dev Kit
 
+> Built following [Anthropic's Effective Context Engineering best practices](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) for AI agents.
+
 Professional software development workflow powered by Claude.
 
 ## Quick Start
