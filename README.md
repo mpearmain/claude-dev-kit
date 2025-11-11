@@ -18,7 +18,7 @@ git clone https://github.com/mpearmain/claude-dev-kit.git
 cd claude-dev-kit
 
 # Run the installer
-./install.sh
+./bin/install.sh
 
 # The installer will:
 # 1. Detect your project type and language
