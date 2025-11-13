@@ -5,6 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 setup_quality_standards() {
     local target_dir="$1"
     local templates_dir="$2"
+    local MIN_COVERAGE="${3:-80}"  # Accept as parameter, default to 80
 
     info "\nSetting up code quality standards..."
 
@@ -12,7 +13,6 @@ setup_quality_standards() {
     cp "$templates_dir/CODE_QUALITY_STANDARDS.md" "$target_dir/.claude/"
 
     # Customize based on language
-    local MIN_COVERAGE="80"
     local MAIN_LANGUAGE=""
 
     # Detect main language
