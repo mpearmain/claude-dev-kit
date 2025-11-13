@@ -88,7 +88,7 @@ When modifying templates in `templates/commands/` or `templates/agents/`:
 
 ### Installer Changes
 
-When modifying `install.sh`:
+When modifying `install.sh` or library modules in `bin/lib/`:
 
 1. **Maintain POSIX compatibility**: Use portable bash syntax
 2. **Test detection logic**: Verify auto-detection works correctly
@@ -100,7 +100,7 @@ When modifying `install.sh`:
 
 To add detection and defaults for a new language:
 
-1. **Add detection in `install.sh`**:
+1. **Add detection in `bin/lib/detect.sh`**:
 
 ```bash
 # Go detection (example)

@@ -160,6 +160,150 @@ You are a specialist at analyzing database schemas and migrations.
 ...
 ```
 
+## Specialist Auto-Trigger Patterns
+
+Specialist agents can be automatically activated when you work on files matching specific patterns. This is configured in `.claude/.claude-specialists.yml`.
+
+### How Auto-Triggers Work
+
+When enabled, specialists activate based on file path patterns:
+
+**Example**: Docker Specialist activates when editing:
+- `Dockerfile`
+- `docker-compose.yml`, `docker-compose.dev.yml`, etc.
+- `.dockerignore`
+- Any file in `*/containers/*` directories
+
+### Configuration File Structure
+
+**File**: `.claude/.claude-specialists.yml`
+
+```yaml
+specialists:
+  docker:
+    enabled: false                    # Set to true to enable
+    agent: docker-specialist          # Agent file to activate
+    auto_trigger_patterns:            # File patterns that trigger this agent
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - ".dockerignore"
+      - "*/containers/*"
+```
+
+### Default Trigger Patterns
+
+The installer configures these default patterns:
+
+| Specialist | Triggers On |
+|---|---|
+| **docker-specialist** | `Dockerfile`, `docker-compose*.yml`, `.dockerignore`, `*/containers/*` |
+| **api-architect** | `*/api/*`, `*/routes/*`, `*/endpoints/*`, `*/controllers/*`, `*/graphql/*` |
+| **database-specialist** | `*/models/*`, `*/schemas/*`, `*/migrations/*`, `*.sql`, `*/db/*` |
+| **security-advisor** | `*/auth/*`, `*/security/*`, `*/permissions/*`, `*crypto*` |
+| **performance-analyst** | `*/cache/*`, `*/optimization/*`, `*worker*`, `*queue*` |
+| **testing-strategist** | `*/tests/*`, `*/test/*`, `*spec.js`, `*test.py` |
+
+### Enabling Specialists
+
+Set `enabled: true` for specialists you want to use:
+
+```yaml
+specialists:
+  docker:
+    enabled: true    # Now active for Docker-related files
+    agent: docker-specialist
+    auto_trigger_patterns:
+      - "Dockerfile"
+      - "docker-compose*.yml"
+```
+
+### Customizing Trigger Patterns
+
+Add project-specific patterns to match your directory structure:
+
+```yaml
+specialists:
+  api:
+    enabled: true
+    agent: api-architect
+    auto_trigger_patterns:
+      - "*/api/*"
+      - "*/routes/*"
+      - "*/endpoints/*"
+      - "*/controllers/*"
+      - "*/graphql/*"
+      - "*/services/api-*"         # Add custom pattern
+      - "*/backend/handlers/*"      # Add another pattern
+```
+
+### Pattern Syntax
+
+Patterns use glob-style matching:
+- `*` matches any characters within a directory
+- `*/directory/*` matches any file in that directory at any depth
+- `*.ext` matches any file with that extension
+- `prefix*` matches files starting with prefix
+
+### Adding Custom Specialists
+
+1. Create agent file: `.claude/agents/custom-specialist.md`
+2. Add configuration to `.claude/.claude-specialists.yml`:
+
+```yaml
+specialists:
+  custom:
+    enabled: true
+    agent: custom-specialist
+    auto_trigger_patterns:
+      - "*/your-directory/*"
+      - "*.your-extension"
+```
+
+### Disabling Auto-Triggers
+
+Set `enabled: false` or remove patterns:
+
+```yaml
+specialists:
+  docker:
+    enabled: false    # Won't auto-trigger
+    agent: docker-specialist
+    auto_trigger_patterns: []    # Or clear patterns
+```
+
+### Testing Trigger Patterns
+
+After customizing, verify patterns match expected files:
+
+```bash
+# List files that would trigger Docker specialist
+find . -name "Dockerfile" -o -name "docker-compose*.yml"
+
+# Check if your custom pattern matches
+find . -path "*/your-directory/*"
+```
+
+### Best Practices
+
+1. **Start conservative** - Enable only specialists you actively need
+2. **Narrow patterns** - Use specific patterns to avoid false triggers
+3. **Test in isolation** - Enable one specialist at a time initially
+4. **Review performance** - Too many auto-triggers may slow workflow
+5. **Document customizations** - Comment why you changed patterns
+
+### Troubleshooting
+
+**Specialist not triggering:**
+- Check `enabled: true` is set
+- Verify file path matches pattern exactly
+- Test pattern with `find` command
+- Check agent file exists at specified path
+
+**Too many triggers:**
+- Narrow patterns to specific directories
+- Use exact filenames instead of wildcards
+- Disable specialists not relevant to project
+
 ## Customizing Directory Structure
 
 ### Default Structure
