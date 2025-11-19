@@ -145,8 +145,6 @@ detect_project_context() {
 
 # Check for optional tools
 check_optional_tools() {
-    # Check for Gemini CLI (optional enhanced analysis)
-    if command -v gemini &> /dev/null; then
-        info "  ✓ Detected Gemini CLI (optional enhanced analysis available)"
-    fi
+    # Reserved for future optional tool detection
+    :
 }
